@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
       - name: Setup Git user
         run: |
@@ -34,8 +32,7 @@ jobs:
           git add tv/iptv4.m3u
           if ! git diff --cached --quiet; then
             git commit -m "Daily sync & clean iptv4.m3u"
-            # !!! 如果默认分支是 master 请改成 master
-            git push origin HEAD:main
+            git push origin HEAD:main   # ⚠️ 如果默认分支是 master，要改成 master
           else
             echo "No changes to commit"
           fi
