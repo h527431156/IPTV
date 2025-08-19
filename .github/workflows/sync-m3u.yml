@@ -2,7 +2,7 @@ name: Daily Sync IPTV .m3u
 
 on:
   schedule:
-    - cron: "0 5 * * *"  # 每天 UTC 5 点（UTC+0），北京时间约早上 13 点
+    - cron: "0 5 * * *"  # 每天 UTC 5 点（北京时间 13 点）
   workflow_dispatch:
 
 jobs:
@@ -22,6 +22,7 @@ jobs:
 
       - name: Fetch upstream .m3u file
         run: |
+          mkdir -p tv
           curl -sSfL "https://raw.githubusercontent.com/vbskycn/iptv/refs/heads/master/tv/iptv4.m3u" -o tv/iptv4.m3u
 
       - name: Clean .m3u file (remove spaces after comma)
@@ -33,6 +34,7 @@ jobs:
           git add tv/iptv4.m3u
           if ! git diff --cached --quiet; then
             git commit -m "Daily sync & clean iptv4.m3u"
+            # !!! 如果默认分支是 master 请改成 master
             git push origin HEAD:main
           else
             echo "No changes to commit"
