@@ -1,0 +1,39 @@
+name: Daily Sync IPTV .m3u
+
+on:
+  schedule:
+    - cron: "0 5 * * *"  # 每天 UTC 5 点（UTC+0），北京时间约早上 13 点
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream .m3u file
+        run: |
+          curl -sSfL "https://raw.githubusercontent.com/vbskycn/iptv/refs/heads/master/tv/iptv4.m3u" -o tv/iptv4.m3u
+
+      - name: Clean .m3u file (remove spaces after comma)
+        run: |
+          sed -i 's/, */,/g' tv/iptv4.m3u
+
+      - name: Commit & push if changed
+        run: |
+          git add tv/iptv4.m3u
+          if ! git diff --cached --quiet; then
+            git commit -m "Daily sync & clean iptv4.m3u"
+            git push origin HEAD:main
+          else
+            echo "No changes to commit"
+          fi
